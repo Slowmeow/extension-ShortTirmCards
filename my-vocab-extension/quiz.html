@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>VocabDeck — Квиз</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: sans-serif;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Выбор колоды ── */
+    .deck-select {
+      text-align: center;
+    }
+
+    .deck-select h1 {
+      font-size: 24px;
+      color: #cba6f7;
+      margin-bottom: 8px;
+    }
+
+    .deck-select p {
+      color: #6c7086;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .deck-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 12px;
+      color: #cdd6f4;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s;
+    }
+
+    .deck-btn:hover { border-color: #cba6f7; }
+
+    .deck-btn .deck-name {
+      font-weight: bold;
+      color: #cba6f7;
+      margin-bottom: 4px;
+    }
+
+    .deck-btn .deck-count {
+      font-size: 13px;
+      color: #6c7086;
+    }
+
+    /* ── Прогресс ── */
+    .progress-bar {
+      background: #313244;
+      border-radius: 4px;
+      height: 6px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #cba6f7;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 13px;
+      color: #6c7086;
+      margin-bottom: 24px;
+    }
+
+    /* ── Карточка ── */
+    .quiz-card {
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 16px;
+      padding: 40px 32px;
+      text-align: center;
+      margin-bottom: 24px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quiz-word {
+      font-size: 36px;
+      color: #cba6f7;
+      font-weight: bold;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .quiz-hint {
+      font-size: 13px;
+      color: #6c7086;
+    }
+
+    .quiz-answer {
+      font-size: 22px;
+      color: #a6e3a1;
+      margin-top: 16px;
+      display: none;
+    }
+
+    /* ── Кнопки ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-show {
+      background: #cba6f7;
+      color: #1e1e2e;
+      width: 100%;
+    }
+
+    .btn-know {
+      background: #a6e3a1;
+      color: #1e1e2e;
+    }
+
+    .btn-skip {
+      background: #313244;
+      color: #cdd6f4;
+    }
+
+    .btn-restart {
+      background: #cba6f7;
+      color: #1e1e2e;
+      width: 100%;
+    }
+
+    .btn-back {
+      background: #313244;
+      color: #cdd6f4;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* ── Результат ── */
+    .result {
+      text-align: center;
+    }
+
+    .result-emoji {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .result h2 {
+      font-size: 24px;
+      color: #cba6f7;
+      margin-bottom: 8px;
+    }
+
+    .result-stats {
+      font-size: 15px;
+      color: #6c7086;
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    .result-stats span {
+      color: #a6e3a1;
+      font-weight: bold;
+    }
+
+    /* ── Скрытые секции ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Экран 1: выбор колоды -->
+  <div class="screen active" id="screen-select">
+    <div class="deck-select">
+      <h1>📚 Квиз</h1>
+      <p>Выбери колоду для проверки</p>
+      <button class="deck-btn" id="btn-session">
+        <div class="deck-name">🕐 Сессия</div>
+        <div class="deck-count" id="session-count">Загрузка...</div>
+      </button>
+      <button class="deck-btn" id="btn-permanent">
+        <div class="deck-name">📖 Все слова</div>
+        <div class="deck-count" id="permanent-count">Загрузка...</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Экран 2: квиз -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-text" id="progress-text"></div>
+
+    <div class="quiz-card">
+      <div class="quiz-word" id="quiz-word"></div>
+      <div class="quiz-hint" id="quiz-hint">нажми чтобы увидеть перевод</div>
+      <div class="quiz-answer" id="quiz-answer"></div>
+    </div>
+
+    <button class="btn btn-show" id="btn-show">Показать перевод</button>
+
+    <div class="btn-row" id="btn-answer-row" style="display:none">
+      <button class="btn btn-skip" id="btn-forgot">✗ Не знал</button>
+      <button class="btn btn-know" id="btn-knew">✓ Знал</button>
+    </div>
+  </div>
+
+  <!-- Экран 3: результат -->
+  <div class="screen" id="screen-result">
+    <div class="result">
+      <div class="result-emoji" id="result-emoji"></div>
+      <h2 id="result-title"></h2>
+      <div class="result-stats" id="result-stats"></div>
+      <button class="btn btn-restart" id="btn-restart">🔄 Ещё раз</button>
+      <button class="btn btn-back" id="btn-back">← Выбрать другую колоду</button>
+    </div>
+  </div>
+
+</div>
+<script src="quiz.js"></script>
+</body>
+</html>

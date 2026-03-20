@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: sans-serif;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Шапка ── */
+    .header {
+      padding: 12px 14px;
+      border-bottom: 1px solid #45475a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header h1 { font-size: 15px; color: #cba6f7; font-weight: bold; }
+
+    .header-btns { display: flex; gap: 6px; }
+
+    .btn-quiz {
+      background: #cba6f7;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-settings {
+      background: transparent;
+      color: #6c7086;
+      border: 1px solid #45475a;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-settings:hover { color: #cba6f7; border-color: #cba6f7; }
+    .btn-settings.active { color: #cba6f7; border-color: #cba6f7; }
+
+    .btn-clear {
+      background: transparent;
+      color: #6c7086;
+      border: 1px solid #45475a;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-clear:hover { color: #f38ba8; border-color: #f38ba8; }
+
+    /* ── Настройки языка ── */
+    .settings-panel {
+      background: #181825;
+      border-bottom: 1px solid #45475a;
+      padding: 12px 14px;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .settings-panel.open { display: block; }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .settings-row:last-child { margin-bottom: 0; }
+
+    .settings-label {
+      font-size: 11px;
+      color: #6c7086;
+      width: 68px;
+      flex-shrink: 0;
+    }
+
+    .lang-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      flex: 1;
+    }
+
+    .lang-btn {
+      background: #313244;
+      border: 1px solid #45475a;
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: #cdd6f4;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .lang-btn:hover { border-color: #cba6f7; }
+
+    .lang-btn.active {
+      background: #cba6f7;
+      border-color: #cba6f7;
+      color: #1e1e2e;
+      font-weight: bold;
+    }
+
+    /* ── Табы ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #45475a;
+      flex-shrink: 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      cursor: pointer;
+      color: #6c7086;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active { color: #cba6f7; border-bottom: 2px solid #cba6f7; }
+
+    .count {
+      display: inline-block;
+      background: #45475a;
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .tab.active .count { background: #cba6f7; color: #1e1e2e; }
+
+    /* ── Список ── */
+    .list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #6c7086;
+      font-size: 13px;
+      margin-top: 40px;
+      line-height: 1.8;
+    }
+
+    .card {
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-text { flex: 1; min-width: 0; }
+
+    .card-word {
+      font-size: 15px;
+      color: #cba6f7;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-translation {
+      font-size: 12px;
+      color: #a6e3a1;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-delete {
+      background: none;
+      border: none;
+      color: #45475a;
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+      padding: 2px 4px;
+    }
+
+    .card-delete:hover { color: #f38ba8; }
+
+    .list::-webkit-scrollbar { width: 4px; }
+    .list::-webkit-scrollbar-track { background: transparent; }
+    .list::-webkit-scrollbar-thumb { background: #45475a; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- Шапка -->
+  <div class="header">
+    <h1>📚 VocabDeck</h1>
+    <div class="header-btns">
+      <button class="btn-quiz" id="btn-quiz">▶ Квиз</button>
+      <button class="btn-settings" id="btn-settings" title="Язык">⚙️</button>
+      <button class="btn-clear" id="btn-clear">Очистить</button>
+    </div>
+  </div>
+
+  <!-- Панель языков -->
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-row">
+      <div class="settings-label">Оригинал</div>
+      <div class="lang-grid" id="source-grid">
+        <button class="lang-btn" data-lang="ja">🇯🇵 JP</button>
+        <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+        <button class="lang-btn" data-lang="ko">🇰🇷 KO</button>
+        <button class="lang-btn" data-lang="zh">🇨🇳 ZH</button>
+        <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
+        <button class="lang-btn" data-lang="fr">🇫🇷 FR</button>
+        <button class="lang-btn" data-lang="es">🇪🇸 ES</button>
+      </div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-label">Перевод</div>
+      <div class="lang-grid" id="target-grid">
+        <button class="lang-btn" data-lang="ru">🇷🇺 RU</button>
+        <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Табы -->
+  <div class="tabs">
+    <div class="tab active" data-tab="session">
+      Сессия <span class="count" id="count-session">0</span>
+    </div>
+    <div class="tab" data-tab="permanent">
+      Все слова <span class="count" id="count-permanent">0</span>
+    </div>
+  </div>
+
+  <!-- Список карточек -->
+  <div class="list" id="list"></div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>
